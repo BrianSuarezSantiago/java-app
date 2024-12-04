@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  pre_build:
+    commands:
+      - echo "Installing dependencies"
+      - yum update -y
+      - yum install java-11-openjdk-devel -y
+      - yum install maven -y
+      - yum install unzip -y
+  build:
+    commands:
+      - echo Downloading source code from S3...
+      - aws s3 cp s3://codebuild-maven/aws-codebuild-sample-maven-project.zip source.zip
+      - echo Unzipping source code...
+      - unzip source.zip -d source
+
+      - echo Building the project...
+      - cd source
+      - mvn clean package -DskipTests
+  post_build:
+    commands:
+      - echo Build completed on `date`
+artifacts:
+  files:
+    - target/aws-codebuild-sample-maven-project.jar
